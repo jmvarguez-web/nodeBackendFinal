@@ -29,7 +29,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import ListUusarios from "../../components/usuarios/ListUusarios";
+import ListLibros from "../../components/libros/ListLibros";
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
@@ -279,7 +279,7 @@ export default function DashboardLibros() {
               {/* Recent Orders */}
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                <ListUusarios/>
+                <ListLibros/>
                 </Paper>
               </Grid>
             </Grid>

@@ -23,7 +23,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-
+// import IconKey from '@mui/icons-material/Key';
 
 
 const darkTheme = thememui({
@@ -108,7 +108,7 @@ const ListUusarios = ({ rowlibros }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [MensajeDialog, setMensajeDialog] = useState('');
   const [severityAlert, setseverityAlert] = useState("error");
- 
+  const [errores, setErrores] = useState([]);
   const [formDataUser, setFormDataUser] = useState({
     // Inicia el estado con los campos del formulario
     iduser: '',
@@ -119,7 +119,7 @@ const ListUusarios = ({ rowlibros }) => {
     password: '',
     accion: 'list'
   });
-  const URL = 'http://localhost:3010/api/libros';
+  const URL = 'http://localhost:3010/api/users';
 
 
   const handleLogout = () => {
@@ -150,6 +150,21 @@ const ListUusarios = ({ rowlibros }) => {
     });
   };
 
+   
+   // Función para asociar errores con campos específicos
+   const getErrorByPath = (error,path) => {
+    let encontrado=false;
+
+     // Verifica si 'errores' es un objeto
+if (typeof error !== 'object' || error === null) {
+  console.log("Error: 'error' no es un objeto");
+  return null;
+}
+encontrado = error.find((error, indice) => error.path === path);
+return encontrado ? encontrado.msg : '';
+
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const storedToken = localStorage.getItem('token');
@@ -175,7 +190,13 @@ const ListUusarios = ({ rowlibros }) => {
         showDataUser();
       })
       .catch(error => {
-        setMensajeAccion(error.response.data.message);
+        console.log(error.response.data.message);
+            if(error.response.data.errors){
+            setErrores(error.response.data.errors || []);}
+            if(error.response.data.message){
+              setMensajeAccion(error.response.data.message);
+            }else{
+            setMensajeAccion("Se genero un error");}
         setseverityAlert("warning");
         setOpenAlert(true);
 
@@ -191,6 +212,7 @@ const ListUusarios = ({ rowlibros }) => {
   const handleNew = () => {
 
     setOpenAlert(false);
+    setErrores([]);
 
     setFormDataUser({
       iduser: '',
@@ -217,7 +239,7 @@ const ListUusarios = ({ rowlibros }) => {
      */
 
 
-    axios.patch(URL + `/${formDataUser.idlibro}`, formDataUser, {
+    axios.patch(URL + `/${formDataUser.iduser}`, formDataUser, {
       headers: {
         'Authorization': `Bearer ${storedToken}`,
         'Content-Type': 'application/json',
@@ -225,13 +247,20 @@ const ListUusarios = ({ rowlibros }) => {
     })
       .then(response => {
         setOpenAlert(true);
-        console.log(response.data);
-        setMensajeAccion('Se ha editado el usuario con clave: ' + response.data.idlibro);
+        console.log("editar",response.data);
+        setMensajeAccion('Se ha editado el usuario con clave: ' + response.data.iduser);
         setseverityAlert("success");
         showDataUser();
       })
       .catch(error => {
-        setMensajeAccion(error.response.data.message);
+        console.log(error.response.data.message);
+        if(error.response.data.errors){
+        setErrores(error.response.data.errors || []);}
+        if(error.response.data.message){
+          setMensajeAccion(error.response.data.message);
+        }else{
+        setMensajeAccion("Se genero un error");}
+      
         setseverityAlert("warning");
         setOpenAlert(true);
 
@@ -248,7 +277,7 @@ const ListUusarios = ({ rowlibros }) => {
     *
     */
    const storedToken = localStorage.getItem('token');
-   axios.delete(URL + `/${formDataUser.idlibro}`, formDataUser, {
+   axios.delete(URL + `/${formDataUser.iduser}`, formDataUser, {
     headers: {
       'Authorization': `Bearer ${storedToken}`,
       'Content-Type': 'application/json',
@@ -259,18 +288,24 @@ const ListUusarios = ({ rowlibros }) => {
      
       if(response.status===204){
         setOpenAlert(true);
-        setMensajeAccion('Se ha Eliminado el usuario con clave: ',formDataUser.idlibro );
+        setMensajeAccion('Se ha Eliminado el usuario con clave: ',formDataUser.iduser );
         setseverityAlert("success");
         handleNew();
       }else{
         setOpenAlert(true);
-        setMensajeAccion('No se pudo Eliminar el usuario con clave: ',formDataUser.idlibro );
+        setMensajeAccion('No se pudo Eliminar el usuario con clave: ',formDataUser.iduser );
       }
       
       showDataUser();
     })
     .catch(error => {
-      setMensajeAccion(error.response.data.message);
+      console.log(error.response.data.message);
+      if(error.response.data.errors){
+      setErrores(error.response.data.errors || []);}
+      if(error.response.data.message){
+        setMensajeAccion(error.response.data.message);
+      }else{
+      setMensajeAccion("Se genero un error");}
       setseverityAlert("warning");
       setOpenAlert(true);
 
@@ -283,6 +318,7 @@ const ListUusarios = ({ rowlibros }) => {
 
   /**habre la modal del formulario con los datos del libro */
   const handleOpen = (libro) => {
+    setErrores([]);
     setFormDataUser(libro);
     setOpenAlert(false);
     setMostrarBotonNew(true);
@@ -448,106 +484,101 @@ const ListUusarios = ({ rowlibros }) => {
 
                 <Typography variant="h6" >
 
+
                 </Typography>
-                <Grid container spacing={3}  >
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      id="idlibro"
-                      name="idlibro"
-                      label="Clave"
-                      fullWidth
-                      variant="filled"
-                      value={formDataUser ? formDataUser.idlibro : ''}
-                      onChange={handleChange}
-                      InputProps={{
-                        readOnly: true,
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      id="isbn"
-                      name="isbn"
-                      label="ISBN"
-                      fullWidth
-                      value={formDataUser ? formDataUser.isbn : ''}
-                      onChange={handleChange}
+                <Grid container spacing={2}>
+                <Grid item xs={12} sm={12}>
+                <TextField
+                  
+                  id="iduser"
+                  name="iduser"
+                  label="Clave"
+                  fullWidth
+                  variant="filled"
+                  value={formDataUser ? formDataUser.iduser : ''}
+                  onChange={handleChange}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  
+                  id="nombre"
+                  name="nombre"
+                  label="nombre"
+                  fullWidth
+                  value={formDataUser ? formDataUser.nombre : ''}
+                  onChange={handleChange}
+                  error={getErrorByPath(errores,'nombre') !== ''}
+                  helperText={getErrorByPath(errores,'nombre')}
+                  
+                />
+              </Grid>
 
+          <Grid container spacing={4}></Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+            
+            id="apellido"
+            name="apellido"
+            label="apellido"
+            fullWidth
+            value={formDataUser ? formDataUser.apellido : ''}
+            onChange={handleChange}
+            error={getErrorByPath(errores,'apellido') !== ''}
+            helperText={getErrorByPath(errores,'apellido')}
+            />
+          </Grid>
+          <Grid item xs={12} >
+            <TextField
+            
+            id="username"
+            name="username"
+            label="username"
+            fullWidth
+            value={formDataUser ? formDataUser.username : ''}
+            onChange={handleChange}
+            error={getErrorByPath(errores,'username') !== ''}
+            helperText={getErrorByPath(errores,'username')}
+            
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+            
+            id="email"
+            name="email"
+            label="email"
+            fullWidth
+            value={formDataUser ? formDataUser.email : ''}
+            onChange={handleChange}
+            error={getErrorByPath(errores,'email') !== ''}
+            helperText={getErrorByPath(errores,'email')}
+            
+            />
+              </Grid>
+              <Grid item xs={12}>
+            <TextField
+            
+            id="password"
+            name="password"
+            label="Nueva contraseña"
+            type="password"
+            autoComplete="new-password" 
+            fullWidth
+            onChange={handleChange}
+            error={getErrorByPath(errores,'password') !== ''}
+            helperText={getErrorByPath(errores,'password')}
+            
+            />
+              </Grid>
 
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      required
-                      id="titulo"
-                      name="titulo"
-                      label="Titulo"
-                      fullWidth
-                      value={formDataUser ? formDataUser.titulo : ''}
-                      onChange={handleChange}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      id="autor_id"
-                      name="autor_id"
-                      label="Autor"
-                      fullWidth
-                      value={formDataUser ? formDataUser.autor_id : ''}
-                      onChange={handleChange}
-                      variant="filled"
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      id="paginas"
-                      name="paginas"
-                      label="Paginas"
-                      fullWidth
-                      value={formDataUser ? formDataUser.paginas : ''}
-                      onChange={handleChange}
-                      variant="filled"
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-
-                    <TextField
-                      id="fecha_publicacion"
-                      name="fecha_publicacion"
-                      label="Fecha de publicación  DD/MM/AAAA"
-                      fullWidth
-                      value={formDataUser ? formDataUser.fecha_publicacion : ''}
-                      onChange={handleChange}
-                      variant="filled"
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-
-                      id="anio"
-                      name="anio"
-                      label="Año"
-                      fullWidth
-                      value={formDataUser ? formDataUser.anio : ''}
-                      onChange={handleChange}
-                      autoComplete="shipping postal-code"
-                      variant="filled"
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-
-                      id="editorial"
-                      name="editorial"
-                      label="Editorial"
-                      fullWidth
-                      value={formDataUser ? formDataUser.editorial : ''}
-                      onChange={handleChange}
-                      variant="filled"
-                    />
-                  </Grid>
-
-                </Grid> <Grid container spacing={4}>
+      
+            </Grid>
+                <Grid container spacing={4}>
                   <Grid item xs={3}>
                     {mostrarBotonSave && (
                       <Button type="submit" disabled={!mostrarBotonSave} variant="outlined" color="primary" sx={{ marginTop: '30px' }}>

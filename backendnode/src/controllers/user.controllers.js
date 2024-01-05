@@ -5,7 +5,7 @@ import {generateAccessToken } from './auth.js';
 
 export const getUsers = async (req, res) => {
   try {
-    const [rows] = await pool.query("SELECT * FROM user");
+    const [rows] = await pool.query("SELECT iduser, nombre, apellido, username, email FROM user");
     res.json(rows);
   } catch (error) {
     return res.status(500).json({ message: "Algo va mal" });
@@ -20,7 +20,7 @@ export const getUser = async (req, res) => {
     ]);
 
     if (rows.length <= 0) {
-      return res.status(404).json({ message: "Autor no encontrado " });
+      return res.status(404).json({ message: "Usuario no encontrado " });
     }
 
     res.json(rows[0]);
@@ -31,6 +31,7 @@ export const getUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
+    console.log(req);
     const { id } = req.params;
     const [rows] = await pool.query("DELETE FROM user WHERE iduser = ?", [id]);
 
@@ -116,6 +117,12 @@ export const loginUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
+    console.log(req.body);
+    // Acceder a los datos validados
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     const { id } = req.params;
     const { nombre, apellido, username, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);

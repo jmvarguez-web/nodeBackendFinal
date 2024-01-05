@@ -24,6 +24,6 @@ router.delete("/users/:id",authenticateToken, deleteUser);
 // INSERT An user
 router.post("/users",authenticateToken,signupValidation, createUser);
 
-router.put("/users/:id",authenticateToken, updateUser);
+router.patch("/users/:id",authenticateToken,signupValidation, updateUser);
 
 export default router;

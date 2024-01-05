@@ -6,6 +6,7 @@ import Login from "./templates/sign-in-side/SignInSide";
 import Suscribete from "./templates/sign-up/SignUp";
 import Dashboard from "./templates/dashboard/Dashboard";
 import Libros from "./templates/dashboard/Libros";
+import Usuarios from "./templates/dashboard/Usuarios";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/suscribete" element={<Suscribete />}/>
         <Route path="/dashboard" element={<Dashboard />}/>
         <Route path="/dashboard/libros" element={<Libros />}/>
+        <Route path="/dashboard/usuarios" element={<Usuarios />}/>
       </Routes>
     
     </Router>

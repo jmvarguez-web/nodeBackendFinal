@@ -289,6 +289,7 @@ const ListProducts = ({ rowlibros }) => {
 
   /**habre la modal del formulario con los datos del libro */
   const handleOpen = (libro) => {
+    
     setFormData(libro);
     setOpenAlert(false);
     setMostrarBotonNew(true);
@@ -493,6 +494,7 @@ const ListProducts = ({ rowlibros }) => {
                       fullWidth
                       value={formData ? formData.isbn : ''}
                       onChange={handleChange}
+                      
 
 
                     />

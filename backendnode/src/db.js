@@ -11,9 +11,9 @@ import { Role,RoleSchema } from'./db/models/role.model.js';
 
 
 const sequelize = new Sequelize(
-  config.dbName, // name database
-  config.dbUser, // user database
-  config.dbPassword, // password database
+  config.dbName, 
+  config.dbUser, 
+  config.dbPassword, 
   {
       host: config.dbHost,
       port:config.dbPort,
